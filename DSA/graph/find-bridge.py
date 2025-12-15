@@ -11,14 +11,15 @@ def find_bridge(n, edge):
     def bridge(u, visisted, parent, low, disc, time):
         visisted[u] = True
 
-        low[u] += time[0]
-        disc[u] += time[0]
+        low[u] = time[0]
+        disc[u] = time[0]
         time[0] += 1
 
         ans = []
 
         for v in graph[u]:
             if not visisted[v]:
+                parent[v] = u
                 find = bridge(v, visisted, parent, low, disc, time)
                 ans.extend(find)
 
