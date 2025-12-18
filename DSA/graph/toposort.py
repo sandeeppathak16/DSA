@@ -24,7 +24,7 @@ def dfs(graph):
                 helper(node)
 
         state[node] = 2
-        state.append(node)
+        stack.append(node)
 
     for node in range(n):
         if not state[node]:
