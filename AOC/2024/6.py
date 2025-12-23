@@ -1,61 +1,78 @@
-with open('6.txt', 'r') as f:
-    grids = [line.strip() for line in f.readlines()]
+with open("6.txt") as f:
+    grid = [list(line.strip()) for line in f]
 
-seen = set()
-guard_position = None
-row = len(grids)
-col = len(grids[0])
-direction = None
+ROWS, COLS = len(grid), len(grid[0])
 
-for r in range(row):
-    if guard_position:
-        break
+for r in range(ROWS):
+    for c in range(COLS):
+        if grid[r][c] in "^v<>":
+            start = (r, c)
+            start_dir = {
+                "^": (-1, 0),
+                "v": (1, 0),
+                "<": (0, -1),
+                ">": (0, 1),
+            }[grid[r][c]]
+            break
 
-    for c in range(col):
-        if grids[r][c] == '^':
-            guard_position = (r, c)
-            direction = (-1, 0)
-        elif grids[r][c] == 'v':
-            guard_position = (r, c)
-            direction = (1, 0)
-        elif grids[r][c] == '<':
-            guard_position = (r, c)
-            direction = (0, -1)
-        elif grids[r][c] == '>':
-            guard_position = (r, c)
-            direction = (0, 1)
-
-turn_mapping = {
+TURN = {
     (-1, 0): (0, 1),
     (0, 1): (1, 0),
     (1, 0): (0, -1),
-    (0, -1): (-1, 0)
+    (0, -1): (-1, 0),
 }
 
-r, c = guard_position
 
-ans1 = 0
-while r < row and c < col:
-    if (r, c) not in seen:
-        seen.add((r, c))
-        ans1 += 1
+visited = set()
+r, c = start
+direction = start_dir
 
-    x, y = direction
-    rx, cy = r + x, c + y
-    if rx >= row or cy >= col or rx < 0 or cy < 0:
+while 0 <= r < ROWS and 0 <= c < COLS:
+    visited.add((r, c))
+    dr, dc = direction
+    nr, nc = r + dr, c + dc
+
+    if not (0 <= nr < ROWS and 0 <= nc < COLS):
         break
 
-    if grids[rx][cy] == '#':
-        direction = turn_mapping[direction]
+    if grid[nr][nc] == "#":
+        direction = TURN[direction]
+    else:
+        r, c = nr, nc
+
+print("Part 1:", len(visited))
+
+
+def causes_loop(block_r, block_c):
+    r, c = start
+    direction = start_dir
+    seen = set()
+
+    while 0 <= r < ROWS and 0 <= c < COLS:
+        state = (r, c, direction)
+        if state in seen:
+            return True
+        seen.add(state)
+
+        dr, dc = direction
+        nr, nc = r + dr, c + dc
+
+        if not (0 <= nr < ROWS and 0 <= nc < COLS):
+            return False
+
+        if (nr, nc) == (block_r, block_c) or grid[nr][nc] == "#":
+            direction = TURN[direction]
+        else:
+            r, c = nr, nc
+
+    return False
+
+
+count = 0
+for r, c in visited:
+    if (r, c) == start:
         continue
+    if causes_loop(r, c):
+        count += 1
 
-    r = rx
-    c = cy
-
-print(ans1)
-
-
-
-
-
-
+print("Part 2:", count)
