@@ -163,6 +163,37 @@ def dijkstra(grid, start_states):
     return dist
 
 
+def dijkstra_reverse(grid, start_states):
+    R, C = len(grid), len(grid[0])
+    dist = [[[INF] * 4 for _ in range(C)] for _ in range(R)]
+    pq = []
+
+    for r, c, d in start_states:
+        dist[r][c][d] = 0
+        heapq.heappush(pq, (0, r, c, d))
+
+    while pq:
+        cost, r, c, d = heapq.heappop(pq)
+        if cost > dist[r][c][d]:
+            continue
+
+        # reverse of moving forward → move backward
+        dr, dc = DIRS[d]
+        pr, pc = r - dr, c - dc
+        if 0 <= pr < R and 0 <= pc < C and grid[pr][pc] != '#':
+            if dist[pr][pc][d] > cost + 1:
+                dist[pr][pc][d] = cost + 1
+                heapq.heappush(pq, (cost + 1, pr, pc, d))
+
+        # reverse turns (same cost)
+        for pd in [(d + 1) % 4, (d - 1) % 4]:
+            if dist[r][c][pd] > cost + 1000:
+                dist[r][c][pd] = cost + 1000
+                heapq.heappush(pq, (cost + 1000, r, c, pd))
+
+    return dist
+
+
 def solve_part2(grid):
     R, C = len(grid), len(grid[0])
 
@@ -175,7 +206,7 @@ def solve_part2(grid):
 
     dist_start = dijkstra(grid, [(sr, sc, 1)])
 
-    dist_end = dijkstra(grid, [(er, ec, d) for d in range(4)])
+    dist_end = dijkstra_reverse(grid, [(er, ec, d) for d in range(4)])
 
     best = min(dist_start[er][ec])
 
