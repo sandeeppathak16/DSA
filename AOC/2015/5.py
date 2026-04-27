@@ -52,3 +52,6 @@ def solve(filename='5.txt'):
 
     return part1_count, part2_count
 
+
+print(solve())
+
