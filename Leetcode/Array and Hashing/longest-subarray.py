@@ -9,22 +9,23 @@ def longest_subarray(nums, k):
     current_sum = 0
     ans = 0
 
-    for i in range(len(nums)):
-        current_sum += nums[i]
+    for i, num in enumerate(nums):
+        current_sum += num
+
 
         if current_sum == k:
-            ans = max(ans, i + 1)
+            ans = i + 1
 
         rem = k - current_sum
 
         if rem in prefix_sum:
-            ans = max(ans, i - prefix_sum[rem])
+            ans = max(ans, i - current_sum[rem])
 
-        if rem not in prefix_sum:
-            prefix_sum[rem] = i
-
+        if current_sum not in prefix_sum:
+            prefix_sum[current_sum] = i
 
     return ans
+    
 
 
 test_cases = [

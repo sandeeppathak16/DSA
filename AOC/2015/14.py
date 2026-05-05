@@ -65,5 +65,3 @@ for key, value in inputs.items():
 
     if value['points'] > maxPoints:
         maxPoints = value['points']
-
-print(maxDistance, maxPoints)

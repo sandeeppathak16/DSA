@@ -26,5 +26,3 @@ def topKFrequent(nums, k):
 
 
 print(topKFrequent(nums, k))
-
-JanGanMan@802119
