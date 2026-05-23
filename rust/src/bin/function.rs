@@ -4,6 +4,6 @@ fn main() {
     println!("value of x: {x}");
 }
 
-fn increase_five(x: i32) -> i32{
+fn increase_five(x: i32) -> i32 {
     x + 5
 }
