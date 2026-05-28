@@ -20,23 +20,20 @@ def pref(s):
 def infix_to_prefix(string):
     ans = ''
     stack = []
-
     string = string[::-1]
 
-    string = string.replace('(', '#')
+    string = string.replace('(', '@')
     string = string.replace(')', '(')
-    string = string.replace('#', ')')
+    string = string.replace('@', ')')
 
     for s in string:
-
         if s.isalnum():
             ans += s
 
         elif s == '(':
             stack.append(s)
-
+        
         elif s == ')':
-
             while stack and stack[-1] != '(':
                 ans += stack.pop()
 
@@ -45,24 +42,26 @@ def infix_to_prefix(string):
         else:
             if s == '^':
                 while (
-                    stack
-                    and stack[-1] != '('
-                    and pref(stack[-1]) >= pref(s)
+                    stack and
+                    stack[-1] != '(' and
+                    pref(stack[-1]) >= pref(s)
                 ):
                     ans += stack.pop()
 
             else:
                 while (
-                    stack
-                    and stack[-1] != '('
-                    and pref(stack[-1]) > pref(s)
+                    stack and
+                    stack[-1] != '(' and
+                    pref(stack[-1]) > pref(s)
                 ):
                     ans += stack.pop()
-
+            
             stack.append(s)
+
 
     while stack:
         ans += stack.pop()
+
 
     return ans[::-1]
 
