@@ -52,8 +52,5 @@ def solve(filename="4.txt"):
                 if "northpole" in decrypted:
                     part2 = sector_id
 
-    print("Part 1:", part1)
-    print("Part 2:", part2)
+    return part1, part2
 
-
-solve()
