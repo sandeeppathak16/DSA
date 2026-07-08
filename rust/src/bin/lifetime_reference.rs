@@ -5,13 +5,13 @@ fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {
 
 fn main() {
     let string1 = String::from("abcd");
-    let result;
+    // let result;
 
-    {
-        let string2 = String::from("xyz");
-        result = longest(string1.as_str(), string2.as_str());
-    }
+    // {
+    //     let string2 = String::from("xyz");
+    //     result = longest(string1.as_str(), string2.as_str());
+    // }
 
-    println!("{result}");
+    // println!("{result}");
 
 }
