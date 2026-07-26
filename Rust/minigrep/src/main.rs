@@ -13,9 +13,14 @@ struct Config {
 
 
 impl Config {
-    fn build(args: &[String]) -> Result<Config, &'static str> {
+    fn build(mut args: impl Iterator<Item = String>) -> Result<Config, &'static str> {
         if args.len() < 3 {
             return Err("not enough arguments");
+        }
+        args.next();
+
+        let query = match args.next() {
+            Some(args)
         }
         let query = args[1].clone();
         let file_path = args[2].clone();
