@@ -1,21 +1,22 @@
-def solve(n):
+def solve(n, part=1):
+    if part == 1:
+        p = 1
+        while p * 2 <= n:
+            p *= 2
 
-    mapping = {i: 1 for i in range(n)}
-    start = 0
+        return 2 * (n - p) + 1
 
-    while True:
-        if mapping[start % n] == 0:
-            start += 1
-            continue
+    elif part == 2:
+        p = 1
+        while p * 3 <= n:
+            p *= 3
 
-        mapping[start] = mapping[(start + 1) % n]
-        if mapping[(start + 1) % n] > 0:
-            mapping[(start + 1) % n] -= 1
-
-        if mapping[start] == n:
-            return start
+        if n == p:
+            return n
+        elif n <= 2 * p:
+            return n - p
         else:
-            start = (start + 1) % n
+            return 2 * n - 3 * p
 
-
-print(solve(5))
+    else:
+        raise ValueError("part must be 1 or 2")
