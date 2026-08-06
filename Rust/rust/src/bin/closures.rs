@@ -42,7 +42,7 @@ fn main() {
     borrows_mutably();
     println!("After calling closure: {list:?}");
 
-        let mut list = [
+    let mut list = [
         Rectangle { width: 10, height: 1 },
         Rectangle { width: 3, height: 5 },
         Rectangle { width: 7, height: 12 },
