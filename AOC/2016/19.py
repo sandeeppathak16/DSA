@@ -17,6 +17,3 @@ def solve(n, part=1):
             return n - p
         else:
             return 2 * n - 3 * p
-
-    else:
-        raise ValueError("part must be 1 or 2")
