@@ -20,7 +20,7 @@ def reverseBetween(head, left, right):
 
     curr = left_node
 
-    rev_node = Node
+    rev_node = None
 
     for _ in range(right - left + 1):
         temp = curr.next
