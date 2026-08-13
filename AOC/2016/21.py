@@ -61,7 +61,7 @@ def solve(filename="21.txt", password="abcdefgh", un_scrambled=False):
             start, end = int(op[2]), int(op[4])
             chars[start : end + 1] = reversed(chars[start : end + 1])
 
-        else:  # move
+        else:
             src = int(op[5]) if un_scrambled else int(op[2])
             dst = int(op[2]) if un_scrambled else int(op[5])
 
