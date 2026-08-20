@@ -1,57 +1,117 @@
-use trpl::{Either, Html};
-use std::time::Duration;
+use trpl::{Either, Html, StreamExt};
+use std::{thread, time::Duration};
 
 fn main() {
-    let args: Vec<String> = std::env::args().collect();
+    // let args: Vec<String> = std::env::args().collect();
+
+    // trpl::block_on(async {
+    //     let title_fut_1 = page_title(&args[1]);
+    //     let title_fut_2 = page_title(&args[2]);
+
+    //     // trpl::block_on(async {
+    //     //     let url = &args[1];
+    //     //     match page_title(url).await {
+    //     //         Some(title) => println!("The title for {url} was {title}"),
+    //     //         None => println!("{url} had no title"),
+    //     //     }
+    //     // });
+
+    //     let (url, maybe_title) =
+    //         match trpl::select(title_fut_1, title_fut_2).await {
+    //             Either::Left(left) => left,
+    //             Either::Right(right) => right,
+    //         };
+
+    //     println!("{url} returned first");
+    //     match maybe_title {
+    //         Some(title) => println!("Its page title was: '{title}'"),
+    //         None => println!("It had no title."),
+    //     }
+    // });
+
+    // trpl::block_on(async {
+    //     let handle = trpl::spawn_task(async {
+    //         for i in 1..10 {
+    //             println!("hi number {i} from the first task!");
+    //             trpl::sleep(Duration::from_millis(500)).await;
+    //         }
+    //     });
+
+    //     for i in 1..5 {
+    //         println!("hi number {i} from the second task!");
+    //         trpl::sleep(Duration::from_millis(500)).await;
+    //     };
+
+    //     handle.await.unwrap();
+    // });
+
+    // trpl::block_on(async {
+    //     run_two_task().await;
+    // });
+
+    // trpl::block_on(async {
+    //     sharing_val().await;
+    // });
+    
+    trpl::block_on(async {
+        let one_ms = Duration::from_millis(1);
+
+        let a = async {
+            println!("'a' started.");
+            slow("a", 30);
+            trpl::yield_now().await;
+            slow("a", 10);
+            trpl::yield_now().await;
+            slow("a", 20);
+            trpl::yield_now().await;
+            println!("'a' finished.");
+        };
+
+        let b = async {
+            println!("'b' started.");
+            slow("b", 75);
+            trpl::yield_now().await;
+            slow("b", 10);
+            trpl::yield_now().await;
+            slow("b", 15);
+            trpl::yield_now().await;
+            slow("b", 350);
+            trpl::yield_now().await;
+            println!("'b' finished.");
+        };
+
+        trpl::select(a, b).await;
+    });
 
     trpl::block_on(async {
-        let title_fut_1 = page_title(&args[1]);
-        let title_fut_2 = page_title(&args[2]);
+        let values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+        let iter = values.iter().map(|n| n * 2);
+        let mut stream = trpl::stream_from_iter(iter);
 
-        // trpl::block_on(async {
-        //     let url = &args[1];
-        //     match page_title(url).await {
-        //         Some(title) => println!("The title for {url} was {title}"),
-        //         None => println!("{url} had no title"),
-        //     }
-        // });
-
-        let (url, maybe_title) =
-            match trpl::select(title_fut_1, title_fut_2).await {
-                Either::Left(left) => left,
-                Either::Right(right) => right,
-            };
-
-        println!("{url} returned first");
-        match maybe_title {
-            Some(title) => println!("Its page title was: '{title}'"),
-            None => println!("It had no title."),
+        while let Some(value) = stream.next().await {
+            println!("The value was: {value}");
         }
     });
 
     trpl::block_on(async {
-        let handle = trpl::spawn_task(async {
-            for i in 1..10 {
-                println!("hi number {i} from the first task!");
-                trpl::sleep(Duration::from_millis(500)).await;
-            }
-        });
-
-        for i in 1..5 {
-            println!("hi number {i} from the second task!");
-            trpl::sleep(Duration::from_millis(500)).await;
+        let slow = async {
+            trpl::sleep(Duration::from_secs(5)).await;
+            "Finally finished"
         };
 
-        handle.await.unwrap();
+        match timeout(slow, Duration::from_secs(2)).await {
+            Ok(message) => println!("Succeeded with '{message}'"),
+            Err(duration) => {
+                println!("Failed after {} seconds", duration.as_secs())
+            }
+        }
     });
+    
+}
 
-    trpl::block_on(async {
-        run_two_task().await;
-    });
-
-    trpl::block_on(async {
-        sharing_val().await;
-    });
+fn slow(name: &str, ms: u64) {
+    thread::sleep(Duration::from_millis(ms));
+    println!("'{name}' ran for {ms}ms");
 }
 
 
@@ -138,4 +198,15 @@ async fn page_title(url: &str) -> (&str, Option<String>) {
         .select_first("title")
         .map(|title| title.inner_html());
     (url, title)
+}
+
+
+async fn timeout<F: Future>(
+    future_to_try: F,
+    max_time: Duration,
+) -> Result<F::Output, Duration> {
+    match trpl::select(future_to_try, trpl::sleep(max_time)).await {
+        Either::Left(output) => Ok(output),
+        Either::Right(_) => Err(max_time),
+    }
 }
