@@ -1,199 +1,6 @@
-# room = []
-# moves = ''
-#
-# with open('15.txt', 'r') as file:
-#     find_moves = False
-#
-#     for line in file.readlines():
-#         line = line.strip()
-#
-#         if line == '':
-#             find_moves = True
-#             continue
-#
-#         if find_moves:
-#             moves += line
-#             continue
-#
-#         room.append(list(line))
-#
-# move_dir = {
-#     '<': (0, -1),
-#     'v': (1, 0),
-#     '>': (0, 1),
-#     '^': (-1, 0)
-# }
-#
-# ROWS = len(room)
-# COLS = len(room[0])
-# robot = None
-#
-# for r in range(ROWS):
-#     if robot:
-#         break
-#
-#     for c in range(COLS):
-#         if room[r][c] == '@':
-#             robot = (r, c)
-#             break
-#
-# for move in moves:
-#     if move not in move_dir:
-#         continue
-#
-#     x, y = move_dir[move]
-#     i, j = robot
-#     ix, jy = i + x, j + y
-#
-#     if not (0 <= ix < ROWS and 0 <= jy < COLS):
-#         continue
-#
-#     if room[ix][jy] == '#':
-#         continue
-#
-#     if room[ix][jy] == '.':
-#         room[i][j] = '.'
-#         room[ix][jy] = '@'
-#         robot = (ix, jy)
-#         continue
-#
-#     ixx, jyy = ix + x, jy + y
-#
-#     while 0 <= ixx < ROWS and 0 <= jyy < COLS and room[ixx][jyy] == 'O':
-#         ixx += x
-#         jyy += y
-#
-#     if 0 <= ixx < ROWS and 0 <= jyy < COLS and room[ixx][jyy] == '.':
-#         room[ixx][jyy] = 'O'
-#         room[ix][jy] = '@'
-#         room[i][j] = '.'
-#         robot = (ix, jy)
-#
-# ans1 = 0
-#
-# for r in range(ROWS):
-#     for c in range(COLS):
-#         if room[r][c] == 'O':
-#             ans1 += 100 * r + c
-#
-# print(ans1)
+from collections import deque
 
-
-## not correct
-# for move in moves:
-#     if move not in move_dir:
-#         continue
-#
-#     x, y = move_dir[move]
-#     i, j = robot
-#     ix, jy = i + x, j + y
-#
-#     if not (0 <= ix < NEW_ROWS and 0 <= jy < NEW_COLS):
-#         continue
-#
-#     if room[ix][jy] == '#':
-#         continue
-#
-#     if room[ix][jy] == '.':
-#         room[i][j] = '.'
-#         room[ix][jy] = '@'
-#         robot = (ix, jy)
-#         continue
-#
-#     ixx, jyy = ix + x, jy + y
-#     boxs = []
-#
-#     if 0 <= ixx < NEW_ROWS and 0 <= jyy < NEW_COLS:
-#         if move in {'^', 'v'}:
-#             a, b = jyy, jyy + 1
-#             while a >= 0 and new_room[ixx][a] in {'[', ']'}:
-#                 a -= 1
-#
-#             while b < NEW_COLS and new_room[ixx][b] in {'[', ']'}:
-#                 b += 1
-#
-#             boxs = new_room[ixx][a:b + 1]
-#         else:
-#             a, b = ixx, ixx + 1
-#             while a >= 0 and new_room[a][jyy] in {'[', ']'}:
-#                 a -= 1
-#
-#             while b < NEW_ROWS and new_room[b][jyy] in {'[', ']'}:
-#                 b += 1
-#
-#             box = []
-#             for z in range(a, b + 1):
-#                 box.append(new_room[z][jyy])
-#
-#     # while boxs and '#' not in boxs and not all(for b in box)
-#
-#     while 0 <= ixx < NEW_ROWS and 0 <= jyy < NEW_COLS and room[ixx][jyy] in {'[', ']'}:
-#         if move in {'^', 'v'}:
-#             a, b = jyy, jyy + 1
-#             while a >= 0 and new_room[ixx][a] in {'[', ']'}:
-#                 a -= 1
-#
-#             while b < NEW_COLS and new_room[ixx][b] in {'[', ']'}:
-#                 b += 1
-#         else:
-#             a, b = ixx, ixx + 1
-#             while a >= 0 and new_room[a][jyy] in {'[', ']'}:
-#                 a -= 1
-#
-#             while b < NEW_ROWS and new_room[b][jyy] in {'[', ']'}:
-#                 b += 1
-#
-#         ixx += x
-#         jyy += y
-#
-#     if 0 <= ixx < ROWS and 0 <= jyy < COLS and room[ixx][jyy] == '.':
-#         room[ixx][jyy] = 'O'
-#         room[ix][jy] = '@'
-#         room[i][j] = '.'
-#         robot = (ix, jy)
-#
-# ans2 = 0
-#
-# for r in range(ROWS):
-#     for c in range(COLS):
-#         if room[r][c] == 'O':
-#             ans2 += 100 * r + c
-#
-# print(ans2)
-
-# Advent of Code 2023 - Day 15 Part 2 (Correct Solution)
-
-with open("15.txt") as f:
-    raw = f.read().split("\n\n")
-
-grid = raw[0].splitlines()
-moves = raw[1].replace("\n", "")
-
-# Step 1: Scale the map
-room = []
-for row in grid:
-    new_row = []
-    for ch in row:
-        if ch == "#":
-            new_row += ["#", "#"]
-        elif ch == ".":
-            new_row += [".", "."]
-        elif ch == "O":
-            new_row += ["[", "]"]
-        elif ch == "@":
-            new_row += ["@", "."]
-    room.append(new_row)
-
-ROWS, COLS = len(room), len(room[0])
-
-# Step 2: Find robot
-for r in range(ROWS):
-    for c in range(COLS):
-        if room[r][c] == "@":
-            robot = (r, c)
-            break
-
-DIR = {
+DIRS = {
     "<": (0, -1),
     ">": (0, 1),
     "^": (-1, 0),
@@ -201,87 +8,191 @@ DIR = {
 }
 
 
-def move_horizontal(r, c, dc):
-    nc = c + dc
-    if room[r][nc] == ".":
-        room[r][c], room[r][nc] = ".", "@"
-        return (r, nc)
+class Warehouse:
+    def __init__(self, grid, part):
+        self.room = self.expand(grid) if part == 2 else [list(row) for row in grid]
+        self.rows = len(self.room)
+        self.cols = len(self.room[0])
+        self.robot = self.find_robot()
+        self.part = part
 
-    if room[r][nc] not in "[]":
-        return (r, c)
+    def expand(self, grid):
+        room = []
 
-    boxes = []
-    x = nc
-    while room[r][x] in "[]":
-        if room[r][x] == "[":
-            boxes.append(x)
-        x += dc
+        for row in grid:
+            new_row = []
 
-    if room[r][x] == "#":
-        return (r, c)
+            for ch in row:
+                if ch == "#":
+                    new_row.extend("##")
+                elif ch == ".":
+                    new_row.extend("..")
+                elif ch == "O":
+                    new_row.extend("[]")
+                elif ch == "@":
+                    new_row.extend("@.")
 
-    for b in reversed(boxes) if dc > 0 else boxes:
-        room[r][b + dc] = "["
-        room[r][b + dc + 1] = "]"
-        room[r][b] = "."
-        room[r][b + 1] = "."
+            room.append(new_row)
 
-    room[r][c], room[r][nc] = ".", "@"
-    return (r, nc)
+        return room
+
+    def find_robot(self):
+        for r, row in enumerate(self.room):
+            for c, ch in enumerate(row):
+                if ch == "@":
+                    return r, c
+
+    def move(self, d):
+        dr, dc = DIRS[d]
+        r, c = self.robot
+
+        if self.part == 1:
+            self.move_part1(r, c, dr, dc)
+        else:
+            self.move_part2(r, c, dr, dc)
+
+    def move_part1(self, r, c, dr, dc):
+        nr, nc = r + dr, c + dc
+
+        if self.room[nr][nc] == "#":
+            return
+
+        if self.room[nr][nc] == ".":
+            self.room[r][c] = "."
+            self.room[nr][nc] = "@"
+            self.robot = (nr, nc)
+            return
+
+        x, y = nr, nc
+
+        while self.room[x][y] == "O":
+            x += dr
+            y += dc
+
+        if self.room[x][y] != ".":
+            return
+
+        self.room[x][y] = "O"
+        self.room[nr][nc] = "@"
+        self.room[r][c] = "."
+        self.robot = (nr, nc)
+
+    def move_part2(self, r, c, dr, dc):
+        if dr == 0:
+            self.move_horizontal(r, c, dc)
+        else:
+            self.move_vertical(r, c, dr)
+
+    def move_horizontal(self, r, c, dc):
+        nc = c + dc
+
+        if self.room[r][nc] == "#":
+            return
+
+        if self.room[r][nc] == ".":
+            self.room[r][c] = "."
+            self.room[r][nc] = "@"
+            self.robot = (r, nc)
+            return
+
+        cells = []
+        x = nc
+
+        while self.room[r][x] in "[]":
+            cells.append(x)
+            x += dc
+
+        if self.room[r][x] == "#":
+            return
+
+        for pos in reversed(cells):
+            self.room[r][pos + dc] = self.room[r][pos]
+
+        self.room[r][c] = "."
+        self.room[r][nc] = "@"
+        self.robot = (r, nc)
+
+    def move_vertical(self, r, c, dr):
+        nr = r + dr
+
+        if self.room[nr][c] == "#":
+            return
+
+        if self.room[nr][c] == ".":
+            self.room[r][c] = "."
+            self.room[nr][c] = "@"
+            self.robot = (nr, c)
+            return
+
+        start_col = c if self.room[nr][c] == "[" else c - 1
+
+        queue = deque([(nr, start_col)])
+        boxes = set()
+
+        while queue:
+            x, y = queue.popleft()
+
+            if (x, y) in boxes:
+                continue
+
+            boxes.add((x, y))
+
+            nx = x + dr
+
+            for ny in (y, y + 1):
+                tile = self.room[nx][ny]
+
+                if tile == "#":
+                    return
+
+                if tile == "[":
+                    queue.append((nx, ny))
+
+                elif tile == "]":
+                    queue.append((nx, ny - 1))
+
+        order = sorted(boxes, reverse=(dr > 0))
+
+        for x, y in order:
+            self.room[x][y] = "."
+            self.room[x][y + 1] = "."
+
+        for x, y in order:
+            self.room[x + dr][y] = "["
+            self.room[x + dr][y + 1] = "]"
+
+        self.room[r][c] = "."
+        self.room[nr][c] = "@"
+        self.robot = (nr, c)
+
+    def gps(self):
+        total = 0
+
+        for r in range(self.rows):
+            for c in range(self.cols):
+                if self.part == 1 and self.room[r][c] == "O":
+                    total += 100 * r + c
+
+                if self.part == 2 and self.room[r][c] == "[":
+                    total += 100 * r + c
+
+        return total
 
 
-def move_vertical(r, c, dr):
-    nr = r + dr
-    if room[nr][c] == ".":
-        room[r][c], room[nr][c] = ".", "@"
-        return (nr, c)
+def solve(part):
+    with open("15.txt") as f:
+        grid, moves = f.read().split("\n\n")
 
-    if room[nr][c] not in "[]":
-        return (r, c)
+    grid = grid.splitlines()
+    moves = moves.replace("\n", "")
 
-    boxes = set()
-    stack = [(nr, c if room[nr][c] == "[" else c - 1)]
+    warehouse = Warehouse(grid, part)
 
-    while stack:
-        x, y = stack.pop()
-        if (x, y) in boxes:
-            continue
-        boxes.add((x, y))
+    for move in moves:
+        warehouse.move(move)
 
-        nx = x + dr
-        for ny in (y, y + 1):
-            if room[nx][ny] == "[":
-                stack.append((nx, ny))
-            elif room[nx][ny] == "]":
-                stack.append((nx, ny - 1))
-            elif room[nx][ny] == "#":
-                return (r, c)
-
-    order = sorted(boxes, reverse=(dr > 0))
-    for x, y in order:
-        room[x + dr][y] = "["
-        room[x + dr][y + 1] = "]"
-        room[x][y] = "."
-        room[x][y + 1] = "."
-
-    room[r][c], room[nr][c] = ".", "@"
-    return (nr, c)
+    return warehouse.gps()
 
 
-# Step 3: Execute moves
-for m in moves:
-    dr, dc = DIR[m]
-    r, c = robot
-    if dr == 0:
-        robot = move_horizontal(r, c, dc)
-    else:
-        robot = move_vertical(r, c, dr)
-
-# Step 4: GPS calculation
-ans = 0
-for r in range(ROWS):
-    for c in range(COLS):
-        if room[r][c] == "[":
-            ans += 100 * r + c
-
-print(ans)
+print("Part 1:", solve(1))
+print("Part 2:", solve(2))
